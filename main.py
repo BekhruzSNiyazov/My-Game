@@ -12,9 +12,11 @@ win = pygame.display.set_mode((width, height))
 background = pygame.image.load("background.jpg")
 planeImg = pygame.image.load("fighter.png")
 helicopterImg = pygame.image.load("helicopter.png")
+aeroplaneImg = pygame.image.load("aeroplane.png")
 bulletImg = pygame.image.load("bullet.png")
-explosion = pygame.image.load("explosion.png")
+explosionImg = pygame.image.load("explosion.png")
 bulletImg = pygame.image.load("bullet.png")
+bombImg = pygame.image.load("bomb.png")
 
 bgX = 0
 bgX2 = background.get_width()
@@ -28,13 +30,32 @@ s2 = 85
 helicopterX = 1500
 helicopterY = 10
 helicopters = []
+aeroplaneX = 2500
+aeroplaneY = 250
+aeroplanes = []
 bulletX = x + s1
 bulletY = y + s2
+bombX = x + s1
+bombY = y + s2
+bombs = []
 bullets = []
-vel = 5
+vel = 10
 speed = 5
 shootLoop = 0
-visible = [True, True, True, True]
+visible = [True, True, True, True, True, True]
+visibleA = [True, True, True, True, True, True]
+index = 0
+
+class Aeroplane():
+	def __init__(self, x, y, visible):
+		self.visible = visible
+		if self.visible:
+			self.x = x
+			self.y = y
+
+	def draw(self):
+		if self.visible:
+			win.blit(aeroplaneImg, (self.x, self.y))
 
 class Helicopter():
 	def __init__(self, x, y, visible):
@@ -53,15 +74,21 @@ class Bullet():
 		self.x = bulletX
 		self.y = bulletY
 
+class Bomb():
+	global bombX, bombY
+	def __init__(self, x, y):
+		self.x = bombX
+		self.y = bombY
+
 def game_over_screen():
 	font = pygame.font.SysFont("Arial", 50, True)
 	text = font.render("GAME OVER", 50, (255, 0, 0))
 	win.blit(text, (500, 300))
-	win.blit(explosion, (x - 50, y - 50))
-	pygame.display.update()	
+	win.blit(explosionImg, (x + 10, y + 10))
+	pygame.display.update()
 
 def reDrawWindow():
-	global helicopterX, helicopterY, helicopters, bulletX, bulletY, bullets, x, y, visible
+	global helicopterX, helicopterY, helicopters, bulletX, bulletY, bullets, x, y, visible, aeroplaneX, aeroplaneY, aeroplanes, visibleA
 
 	win.blit(background, (bgX, 0))
 	win.blit(background, (bgX2, 0))
@@ -71,6 +98,16 @@ def reDrawWindow():
 		helicopter = Helicopter(helicopterX + i * 200, helicopterY, visible[i])
 		helicopter.draw()
 		helicopters.append(helicopter)
+
+	for i in range(2):
+		helicopter = Helicopter(helicopterX + i * 200, helicopterY + 300, visible[i])
+		helicopter.draw()
+		helicopters.append(helicopter)
+
+	for i in range(6):
+		aeroplane = Aeroplane(aeroplaneX + i * 200, aeroplaneY, visibleA[i])
+		aeroplane.draw()
+		aeroplanes.append(aeroplane)
 	
 	if helicopterX < 300:
 		helicopterY += vel
@@ -78,6 +115,10 @@ def reDrawWindow():
 	if len(bullets) > 0:
 		for i in range(len(bullets)):
 			win.blit(bulletImg, (bullets[i].x, bullets[i].y))
+
+	if len(bombs) > 0:
+		for i in range(len(bombs) - index):
+			win.blit(bombImg, (bombs[i].x, bombs[i].y))
 
 	pygame.display.update()
 
@@ -125,6 +166,15 @@ while running:
 
 		shootLoop = 1
 
+	if keys[pygame.K_s] and shootLoop == 0:
+		bombX = x + s1
+		bombY = y + s2
+		if len(bombs) <= 5:
+			bomb = Bomb(bombX, bombY)
+			bombs.append(bomb)
+
+		shootLoop = 1
+
 	for helicopter in helicopters:
 		try:
 			if helicopter.y + helicopterImg.get_height() - 20 < y + planeImg.get_height() - 20 and helicopter.y + helicopterImg.get_height() > y:
@@ -135,21 +185,66 @@ while running:
 		except Exception as e:
 			print(e)
 
+	for aeroplane in aeroplanes:
+		try:
+			if aeroplane.y + aeroplaneImg.get_height() - 20 < y + planeImg.get_height() - 20 and aeroplane.y + aeroplaneImg.get_height() > y:
+				if aeroplane.x + aeroplaneImg.get_width() < x + planeImg.get_width() and aeroplane.x + planeImg.get_width() > x:
+					game_over_screen()
+					running = False
+					time.sleep(0.5)
+		except Exception as e:
+			print(e)
+
 	for bullet in bullets:
-		for i in range(4):
-			if bullet.y + bulletImg.get_height() - 30 < helicopterY + helicopterImg.get_height() - 30 and bullet.y + bulletImg.get_height() > helicopterY:
+		for i in range(6):
+			if bullet.y + bulletImg.get_height() - 30 < helicopterY + helicopterImg.get_height() - 30 and bullet.y + bulletImg.get_height() > helicopterY or bullet.y + bulletImg.get_height() - 30 < helicopterY + helicopterImg.get_height() + 300 - 30 and bullet.y + bulletImg.get_height() > helicopterY + 300:
 				if bullet.x + bulletImg.get_width() < helicopterX + i * 200 + helicopterImg.get_width() and bullet.x + bulletImg.get_width() > helicopterX + i * 200:
 					bullets.pop(bullets.index(bullet))
 					visible[i] = False
 
 			win.blit(bulletImg, (bullet.x, bullet.y))
-				
+		
+		for i in range(6):
+			if bullet.y + bulletImg.get_height() - 30 < aeroplaneY + aeroplaneImg.get_height() - 30 and bullet.y + bulletImg.get_height() > aeroplaneY:
+				if bullet.x + bulletImg.get_width() < aeroplaneX + i * 200 + aeroplaneImg.get_width() and bullet.x + bulletImg.get_width() > aeroplaneX + i * 200:
+					bullets.pop(bullets.index(bullet))
+					visibleA[i] = False
+
 		if bullet.x == width:
 			bullets.pop(bullets.index(bullet))
 
 		bullet.x += vel + 5
 
+	for bomb in bombs:
+		for i in range(6):
+			if bomb.y + bombImg.get_height() - 30 < helicopterY + helicopterImg.get_height() - 30 and bomb.y + bombImg.get_height() > helicopterY or bomb.y + bombImg.get_height() - 30 < helicopterY + helicopterImg.get_height() + 300 - 30 and bomb.y + bombImg.get_height() > helicopterY + 300:
+				if bomb.x + bombImg.get_width() < helicopterX + i * 200 + helicopterImg.get_width() and bomb.x + bombImg.get_width() > helicopterX + i * 200:
+					if index == 3:
+						bombs.pop(bombs.index(bomb))
+						index = 0
+					visible[i] = False
+
+			win.blit(bombImg, (bomb.x, bomb.y))
+		
+		for i in range(6):
+			if bomb.y + bombImg.get_height() - 30 < aeroplaneY + aeroplaneImg.get_height() - 30 and bomb.y + bombImg.get_height() > aeroplaneY:
+				if index == 3:
+					try:
+						bombs.pop(bombs.index(bomb))
+					except Exception as e:
+						print(e)
+					index = 0
+				else:
+					index += 1
+				visible[i] = False
+
+		if bomb.x == width:
+			bombs.pop(bombs.index(bomb))
+
+		bomb.x += vel + 5
+
 	helicopterX -= vel
+	aeroplaneX -= vel
 
 	pygame.display.update()
 
