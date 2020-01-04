@@ -1,4 +1,4 @@
-# Beta 3.0 #
+# BETA 4.0 #
 
 import pygame
 import time
@@ -7,7 +7,7 @@ pygame.init()
 pygame.font.init()
 
 width = 1250
-height = 650
+height = 700
 
 win = pygame.display.set_mode((width, height))
 
@@ -20,6 +20,7 @@ explosionImg = pygame.image.load("explosion.png")
 bulletImg = pygame.image.load("bullet.png")
 bombImg = pygame.image.load("bomb.png")
 iconImg = pygame.image.load("icon.png")
+airplaneImg = pygame.image.load("airplane.png")
 
 bgX = 0
 bgX2 = background.get_width()
@@ -37,6 +38,9 @@ helicopters = []
 aeroplaneX = 2500
 aeroplaneY = 250
 aeroplanes = []
+airplaneX = 2750
+airplaneY = 500
+airplanes = []
 bulletX = x + s1
 bulletY = y + s2
 bombX = x + s1
@@ -48,6 +52,7 @@ speed = 20
 shootLoop = 0
 visible = [True, True, True, True, True, True]
 visibleA = [True, True, True, True, True, True]
+visibleB = [True, True, True, True]
 index = 0
 
 class Aeroplane():
@@ -60,6 +65,17 @@ class Aeroplane():
 	def draw(self):
 		if self.visible:
 			win.blit(aeroplaneImg, (self.x, self.y))
+
+class Airplane():
+	def __init__(self, x, y, visible):
+		self.visible = visible
+		if self.visible:
+			self.x = x
+			self.y = y
+
+	def draw(self):
+		if self.visible:
+			win.blit(airplaneImg, (self.x, self.y)) 
 
 class Helicopter():
 	def __init__(self, x, y, visible):
@@ -118,6 +134,11 @@ def reDrawWindow():
 		aeroplane = Aeroplane(aeroplaneX + i * 200, aeroplaneY, visibleA[i])
 		aeroplane.draw()
 		aeroplanes.append(aeroplane)
+
+	for i in range(4):
+		airplane = Airplane(airplaneX + i * 200, airplaneY, visibleB[i])
+		airplane.draw()
+		airplanes.append(airplane)
 	
 	if helicopterX < 300:
 		helicopterY += vel
@@ -208,6 +229,16 @@ while running:
 		except:
 			pass
 
+	for airplane in airplanes:
+		try:
+			if airplane.y + airplaneImg.get_height() - 20 < y + planeImg.get_height() - 20 and airplane.y + airplaneImg.get_height() > y:
+				if airplane.x + airplaneImg.get_width() < x + planeImg.get_width() and airplane.x + planeImg.get_width() > x:
+					game_over_screen()
+					running = False
+					time.sleep(0.5)
+		except:
+			pass
+
 	for bullet in bullets:
 		for i in range(6):
 			if bullet.y + bulletImg.get_height() - 30 < helicopterY + helicopterImg.get_height() - 30 and bullet.y + bulletImg.get_height() > helicopterY or bullet.y + bulletImg.get_height() - 30 < helicopterY + helicopterImg.get_height() + 300 - 30 and bullet.y + bulletImg.get_height() > helicopterY + 300:
@@ -229,10 +260,22 @@ while running:
 						pass
 					visibleA[i] = False
 
-		if bullet.x == width:
-			bullets.pop(bullets.index(bullet))
+		for i in range(4):
+			if bullet.y + bulletImg.get_height() - 30 < airplaneY + airplaneImg.get_height() - 30 and bullet.y + bulletImg.get_height() > airplaneY:
+				if bullet.x + bulletImg.get_width() < airplaneX + i * 200 + airplaneImg.get_width() and bullet.x + bulletImg.get_width() > airplaneX + i * 200:
+					try:
+						bullets.pop(bullets.index(bullet))
+					except:
+						pass
+					visibleB[i] = False
 
-		bullet.x += vel + 5
+		if bullet.x == width:
+			try:
+				bullets.pop(bullets.index(bullet))
+			except:
+				pass
+
+		bullet.x += vel + 10
 
 	for bomb in bombs:
 		for i in range(6):
@@ -251,17 +294,26 @@ while running:
 				if bomb.x + bombImg.get_width() < aeroplaneX + i * 200 + aeroplaneImg.get_width() and bomb.x + bombImg.get_width() > aeroplaneX + i * 200:
 					visibleA[i] = False
 
+		for i in range(6):
+			if bomb.y + bombImg.get_height() - 30 < airplaneY + airplaneImg.get_height() - 30 and bomb.y + bombImg.get_height() > airplaneY:
+				if bomb.x + bombImg.get_width() < airplaneX + i * 200 + airplaneImg.get_width() and bomb.x + bombImg.get_width() > airplaneX + i * 200:
+					try:
+						visibleB[i] = False
+					except:
+						pass
+
 		bomb.x += vel + 5
 
 	helicopterX -= vel
 	aeroplaneX -= vel
+	airplaneX -= vel
 
 	if True not in visible:
 		if True not in visibleA:
-			print("YOU WON!")
-			you_won_screen()
-			running = False
-			time.sleep(1)
+			if True not in visibleB:
+				you_won_screen()
+				running = False
+				time.sleep(1)
 
 	pygame.display.update()
 
