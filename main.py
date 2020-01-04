@@ -1,3 +1,5 @@
+# Beta 3.0 #
+
 import pygame
 import time
 
