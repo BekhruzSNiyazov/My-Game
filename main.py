@@ -1,4 +1,4 @@
-# BETA 4.5 #
+# BETA 4.7 #
 
 import pygame
 import time
@@ -37,7 +37,7 @@ helicopterY = 10
 helicopterY1 = helicopterY + 300
 helicopterY2 = helicopterY
 helicopterX1 = 2000
-helicopterX2 = 2500
+helicopterX2 = 3000
 helicopters = []
 aeroplaneX = 2500
 aeroplaneY = 250
@@ -214,11 +214,11 @@ while running:
 
 		shootLoop = 1
 
-	if keys[pygame.K_s] or keys[pygame.K_l] and shootLoop == 0:
+	if keys[pygame.K_s] or keys[pygame.K_l] and shootLoopB == 0:
 		if index < 5:
 			bombX = x + s1
 			bombY = y + s2
-			if len(bombs) <= 10:
+			if len(bombs) <= 5:
 				bomb = Bomb(bombX, bombY)
 				bombs.append(bomb)
 		else:
@@ -352,7 +352,8 @@ while running:
 	helicopterX -= vel
 	helicopterX1 -= vel
 	helicopterX2 -= vel
-	helicopterY1 -= vel // 2
+	if helicopterY2 <= height - 10:
+		helicopterY2 -= vel // 2
 	aeroplaneX -= vel
 	airplaneX -= vel
 
