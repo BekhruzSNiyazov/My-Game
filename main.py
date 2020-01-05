@@ -1,4 +1,4 @@
-# *** BETA 5.0 *** #
+# *** BETA 5.1 *** #
 
 import pygame
 import time
@@ -68,8 +68,12 @@ down = True
 up = False
 greatPlaneX = 3000
 greatPlaneY = -600
+gpBulletX = greatPlaneX
+gpBulletY = greatPlaneY
 hitNum1 = 0
 hitNum2 = 0
+score = 0
+directions = ["up", "down", "left", "right", "upper-left", "upper-right", "bottom-left", "bottom-right"]
 
 class GreatPlane():
 	def __init__(self, x, y, visible):
@@ -81,11 +85,6 @@ class GreatPlane():
 	def draw(self):
 		if self.visible:
 			win.blit(greatplaneImg, (greatPlaneX, greatPlaneY))
-
-	def shoot(self):
-		if self.visible:
-			if self.x <= 700:
-				pygame.draw.circle(win, (255, 0, 0), (random.randrange(width), random.randrange(height)), 10)
 
 class Aeroplane():
 	def __init__(self, x, y, visible):
@@ -145,8 +144,14 @@ def you_won_screen():
 	win.blit(text, (400, 300))
 	pygame.display.update()
 
+def show_score():
+	font = pygame.font.SysFont("Arial", 25, True)
+	text = font.render(f"Score: {score // 10}", 50, (255, 255, 255))
+	win.blit(text, (50, 50))
+	pygame.display.update()
+
 def reDrawWindow():
-	global helicopterX, helicopterY, helicopters, bulletX, bulletY, bullets, x, y, visible, aeroplaneX, aeroplaneY, aeroplanes, visibleA, visibleGP, greatplaneImg, greatPlaneX, greatPlaneY
+	global helicopterX, helicopterY, helicopters, bulletX, bulletY, bullets, x, y, visible, aeroplaneX, aeroplaneY, aeroplanes, visibleA, visibleGP, greatplaneImg, greatPlaneX, greatPlaneY, gpBulletX, gpBulletY, directions, vel
 
 	win.blit(background, (bgX, 0))
 	win.blit(background, (bgX2, 0))
@@ -190,6 +195,34 @@ def reDrawWindow():
 
 	greatPlane = GreatPlane(greatPlaneX, greatPlaneY, visibleGP)
 	greatPlane.draw()
+
+	if greatPlaneX >= 750:
+		if greatPlane.visible:
+			pygame.draw.circle(win, (255, 0, 0), (gpBulletX, gpBulletY), 10)
+		
+		direction = directions[random.randrange(len(directions))]
+		if direction == directions[0]:
+			gpBulletY -= vel * 3
+		elif direction == directions[1]:
+			gpBulletY += vel * 3
+		elif direction == directions[2]:
+			gpBulletX -= vel * 3
+		elif direction == directions[3]:
+			gpBulletX += vel * 3
+		elif direction == directions[4]:
+			gpBulletY -= vel * 3
+			gpBulletX -= vel * 3
+		elif direction == directions[5]:
+			gpBulletY -= vel * 3
+			gpBulletX += vel * 3
+		elif direction == directions[6]:
+			gpBulletY += vel * 3
+			gpBulletX -= vel * 3
+		else:
+			gpBulletY += vel * 3
+			gpBulletX += vel * 3
+
+	show_score()
 
 	pygame.display.update()
 
@@ -243,10 +276,10 @@ while running:
 		shootLoop = 1
 
 	if keys[pygame.K_s] or keys[pygame.K_l] and shootLoopB == 0:
-		if index < 8:
+		if index < 5:
 			bombX = x + s1
 			bombY = y + s2
-			if len(bombs) <= 8:
+			if len(bombs) <= 5:
 				bomb = Bomb(bombX, bombY)
 				bombs.append(bomb)
 		else:
@@ -260,7 +293,7 @@ while running:
 				if helicopter.x + helicopterImg.get_width() < x + planeImg.get_width() and helicopter.x + planeImg.get_width() > x:
 					game_over_screen()
 					running = False
-					time.sleep(0.01)
+					time.sleep(0.1)
 		except:
 			pass
 
@@ -270,7 +303,7 @@ while running:
 				if aeroplane.x + aeroplaneImg.get_width() < x + planeImg.get_width() and aeroplane.x + planeImg.get_width() > x:
 					game_over_screen()
 					running = False
-					time.sleep(0.5)
+					time.sleep(0.1)
 		except:
 			pass
 
@@ -294,6 +327,7 @@ while running:
 						pass
 					try:
 						visible[i] = False
+						score += 1
 					except:
 						pass
 
@@ -306,6 +340,7 @@ while running:
 						pass
 					try:
 						visibleH1[i] = False
+						score += 1
 					except:
 						pass
 
@@ -318,6 +353,7 @@ while running:
 						pass
 					try:
 						visibleH2[i] = False
+						score += 1
 					except:
 						pass
 
@@ -332,6 +368,7 @@ while running:
 						pass
 					try:
 						visibleA[i] = False
+						score += 1
 					except:
 						pass
 
@@ -344,6 +381,7 @@ while running:
 						pass
 					try:
 						visibleB[i] = False
+						score += 1
 					except:
 						pass
 
@@ -354,7 +392,8 @@ while running:
 					except:
 						pass
 					try:
-						if hitNum1 >= 20:
+						if hitNum1 >= 8000:
+							score += 1
 							visibleGP = False
 						else:
 							hitNum1 += 1
@@ -367,7 +406,7 @@ while running:
 			except:
 				pass
 
-		bullet.x += vel * 4
+		bullet.x += vel * 6
 
 	for bomb in bombs:
 		for i in range(4):
@@ -375,6 +414,7 @@ while running:
 				if bomb.x + bombImg.get_width() < helicopterX + i * 200 + helicopterImg.get_width() and bomb.x + bombImg.get_width() > helicopterX + i * 200:
 					try:
 						visible[i] = False
+						score += 1
 					except:
 						pass
 
@@ -383,6 +423,7 @@ while running:
 				if bomb.x + bombImg.get_width() < helicopterX1 + i * 200 + helicopterImg.get_width() and bomb.x + bombImg.get_width() > helicopterX1 + i * 200:
 					try:
 						visibleH1[i] = False
+						score += 1
 					except:
 						pass
 
@@ -391,6 +432,7 @@ while running:
 				if bomb.x + bombImg.get_width() < helicopterX2 + i * 200 + helicopterImg.get_width() and bomb.x + bombImg.get_width() > helicopterX2 + i * 200:
 					try:
 						visibleH2[i] = False
+						score += 1
 					except:
 						pass
 
@@ -400,6 +442,7 @@ while running:
 			if bomb.y + bombImg.get_height() - 30 < aeroplaneY + aeroplaneImg.get_height() - 30 and bomb.y + bombImg.get_height() > aeroplaneY:
 				try:
 					visible[i] = False
+					score += 1
 				except:
 					pass
 
@@ -408,6 +451,7 @@ while running:
 				if bomb.x + bombImg.get_width() < aeroplaneX + i * 200 + aeroplaneImg.get_width() and bomb.x + bombImg.get_width() > aeroplaneX + i * 200:
 					try:
 						visibleA[i] = False
+						score += 1
 					except:
 						pass
 
@@ -416,18 +460,26 @@ while running:
 				if bomb.x + bombImg.get_width() < airplaneX + i * 200 + airplaneImg.get_width() and bomb.x + bombImg.get_width() > airplaneX + i * 200:
 					try:
 						visibleB[i] = False
+						score += 1
 					except:
 						pass
 
 		if bomb.y + bombImg.get_height() - 30 < greatPlaneY + greatplaneImg.get_height() - 30 and bomb.y + bombImg.get_height() > greatPlaneY:
 				if bomb.x + bombImg.get_width() < greatPlaneX + greatplaneImg.get_width() and bomb.x + bombImg.get_width() > greatPlaneX:
 					try:
-						if hitNum2 >= 10:
+						if hitNum2 >= 4000:
+							score += 1
 							visibleGP = False
 						else:
 							hitNum2 += 1
 					except:
 						pass
+
+		if bomb.x == width:
+			try:
+				bomb.pop(bombs.index(bombs))
+			except:
+				pass
 
 		bomb.x += vel + 5
 
@@ -435,10 +487,12 @@ while running:
 	helicopterX1 -= vel
 	aeroplaneX -= vel
 	airplaneX -= vel
-	if greatPlaneX >= 500:
+
+	if greatPlaneX >= 700:
+		greatPlaneX -= vel / 2
+	if greatPlaneX <= 700:
 		if greatPlaneY < 200:
 			greatPlaneY += vel
-		greatPlaneX -= vel / 2
 	helicopterX2 -= 0.5
 	if down:
 		helicopterY2 += vel
@@ -453,16 +507,21 @@ while running:
 			up = False	
 			down = True
 
+	if not(visibleGP) and True not in visible and True not in visibleH2:
+		you_won_screen()
+		running = False
+		time.sleep(1)
+
 	if True not in visible:
 		if True not in visibleH1:
 			if True not in visibleH2:
 				if True not in visibleA:
 					if True not in visibleB:
-						if not(visibleGP):
-							you_won_screen()
-							running = False
-							time.sleep(1)
+						you_won_screen()
+						running = False
+						time.sleep(0.1)
+
 
 	pygame.display.update()
 
-pygame.quit()
+exit()
