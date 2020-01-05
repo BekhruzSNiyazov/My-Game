@@ -1,4 +1,4 @@
-# *** BETA 4.8 *** #
+# * * *    BETA 4.9    * * * #
 
 import pygame
 import time
@@ -59,7 +59,7 @@ visible = [True, True, True, True, True, True]
 visibleA = [True, True, True, True, True, True]
 visibleB = [True, True, True, True]
 visibleH1 = [True, True, True]
-visibleH2 = [True, True, True, True, True, True]
+visibleH2 = [True, True]
 index = 0
 down = True
 up = False
@@ -217,10 +217,10 @@ while running:
 		shootLoop = 1
 
 	if keys[pygame.K_s] or keys[pygame.K_l] and shootLoopB == 0:
-		if index < 10:
+		if index < 8:
 			bombX = x + s1
 			bombY = y + s2
-			if len(bombs) <= 10:
+			if len(bombs) <= 8:
 				bomb = Bomb(bombX, bombY)
 				bombs.append(bomb)
 		else:
@@ -312,7 +312,7 @@ while running:
 			except:
 				pass
 
-		bullet.x += vel + 10
+		bullet.x += vel * 4
 
 	for bomb in bombs:
 		for i in range(4):
