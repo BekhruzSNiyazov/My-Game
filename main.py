@@ -215,8 +215,6 @@ def reDrawWindow():
 			gpBulletY += vel * 3
 			gpBulletX += vel * 3
 
-	show_score()
-
 	pygame.display.update()
 
 running = True
