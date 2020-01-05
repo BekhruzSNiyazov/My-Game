@@ -1,4 +1,4 @@
-# BETA 4.7 #
+# *** BETA 4.8 *** #
 
 import pygame
 import time
@@ -34,10 +34,10 @@ s1 = 30
 s2 = 85
 helicopterX = 1500
 helicopterY = 10
-helicopterY1 = helicopterY + 300
-helicopterY2 = helicopterY
-helicopterX1 = 2000
-helicopterX2 = 3000
+helicopterY1 = helicopterY + 100
+helicopterY2 = 0
+helicopterX1 = 2500
+helicopterX2 = 800
 helicopters = []
 aeroplaneX = 2500
 aeroplaneY = 250
@@ -61,6 +61,8 @@ visibleB = [True, True, True, True]
 visibleH1 = [True, True, True]
 visibleH2 = [True, True, True, True, True, True]
 index = 0
+down = True
+up = False
 
 class Aeroplane():
 	def __init__(self, x, y, visible):
@@ -147,7 +149,7 @@ def reDrawWindow():
 		airplane.draw()
 		airplanes.append(airplane)
 
-	for i in range(6):
+	for i in range(2):
 		helicopter = Helicopter(helicopterX2 + i * 200, helicopterY2, visibleH2[i])
 		helicopter.draw()
 		helicopters.append(helicopter)
@@ -215,10 +217,10 @@ while running:
 		shootLoop = 1
 
 	if keys[pygame.K_s] or keys[pygame.K_l] and shootLoopB == 0:
-		if index < 5:
+		if index < 10:
 			bombX = x + s1
 			bombY = y + s2
-			if len(bombs) <= 5:
+			if len(bombs) <= 10:
 				bomb = Bomb(bombX, bombY)
 				bombs.append(bomb)
 		else:
@@ -323,7 +325,7 @@ while running:
 				if bomb.x + bombImg.get_width() < helicopterX1 + i * 200 + helicopterImg.get_width() and bomb.x + bombImg.get_width() > helicopterX1 + i * 200:
 					visibleH1[i] = False
 
-		for i in range(6):
+		for i in range(2):
 			if bomb.y + bombImg.get_height() - 30 < helicopterY2 + helicopterImg.get_height() - 30 and bomb.y + bombImg.get_height() > helicopterY2:
 				if bomb.x + bombImg.get_width() < helicopterX2 + i * 200 + helicopterImg.get_width() and bomb.x + bombImg.get_width() > helicopterX2 + i * 200:
 					visibleH2[i] = False
@@ -351,11 +353,21 @@ while running:
 
 	helicopterX -= vel
 	helicopterX1 -= vel
-	helicopterX2 -= vel
-	if helicopterY2 <= height - 10:
-		helicopterY2 -= vel // 2
 	aeroplaneX -= vel
 	airplaneX -= vel
+	helicopterX2 -= 0.5
+	if down:
+		helicopterY2 += vel
+		up = False
+		if helicopterY2 >= height:
+			down = False
+			up = True
+	if up:
+		helicopterY2 -= vel
+		down = False
+		if helicopterY2 <= 0:
+			up = False	
+			down = True
 
 	if True not in visible:
 		if True not in visibleH1:
