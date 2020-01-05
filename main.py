@@ -1,4 +1,4 @@
-# * * *    BETA 4.9    * * * #
+# * * *     BETA 4.9     * * * #
 
 import pygame
 import time
