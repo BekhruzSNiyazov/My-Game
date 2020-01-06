@@ -1,4 +1,4 @@
-#  *** BETA 5.2 ***  # 
+#  *** BETA 5.3 ***  #
 
 import pygame
 import time
@@ -10,7 +10,7 @@ pygame.font.init()
 width = 1250
 height = 700
 
-win = pygame.display.set_mode((width, height))
+level1 = pygame.display.set_mode((width, height))
 
 background = pygame.image.load("background.jpg")
 planeImg = pygame.image.load("fighter.png")
@@ -18,7 +18,6 @@ helicopterImg = pygame.image.load("helicopter.png")
 aeroplaneImg = pygame.image.load("aeroplane.png")
 bulletImg = pygame.image.load("bullet.png")
 explosionImg = pygame.image.load("explosion.png")
-bulletImg = pygame.image.load("bullet.png")
 bombImg = pygame.image.load("bomb.png")
 iconImg = pygame.image.load("icon.png")
 airplaneImg = pygame.image.load("airplane.png")
@@ -27,7 +26,7 @@ greatplaneImg = pygame.image.load("greatplane.png")
 bgX = 0
 bgX2 = background.get_width()
 
-pygame.display.set_caption("My Game")
+pygame.display.set_caption("Air Battle")
 pygame.display.set_icon(iconImg)
 
 x = 100
@@ -68,11 +67,9 @@ down = True
 up = False
 greatPlaneX = 3000
 greatPlaneY = -600
-gpBulletX = greatPlaneX
-gpBulletY = greatPlaneY
 hitNum1 = 0
 hitNum2 = 0
-directions = ["up", "down", "left", "right", "upper-left", "upper-right", "bottom-left", "bottom-right"]
+level1Completed = False
 
 class GreatPlane():
 	def __init__(self, x, y, visible):
@@ -83,7 +80,7 @@ class GreatPlane():
 
 	def draw(self):
 		if self.visible:
-			win.blit(greatplaneImg, (greatPlaneX, greatPlaneY))
+			level1.blit(greatplaneImg, (greatPlaneX, greatPlaneY))
 
 class Aeroplane():
 	def __init__(self, x, y, visible):
@@ -94,7 +91,7 @@ class Aeroplane():
 
 	def draw(self):
 		if self.visible:
-			win.blit(aeroplaneImg, (self.x, self.y))
+			level1.blit(aeroplaneImg, (self.x, self.y))
 
 class Airplane():
 	def __init__(self, x, y, visible):
@@ -105,7 +102,7 @@ class Airplane():
 
 	def draw(self):
 		if self.visible:
-			win.blit(airplaneImg, (self.x, self.y)) 
+			level1.blit(airplaneImg, (self.x, self.y)) 
 
 class Helicopter():
 	def __init__(self, x, y, visible):
@@ -116,39 +113,39 @@ class Helicopter():
 
 	def draw(self):
 		if self.visible:
-			win.blit(helicopterImg, (self.x, self.y))
+			level1.blit(helicopterImg, (self.x, self.y))
 
 class Bullet():
 	global bulletX, bulletY
-	def __init__(self, x, y):
+	def __init__(self):
 		self.x = bulletX
 		self.y = bulletY
 
 class Bomb():
 	global bombX, bombY
-	def __init__(self, x, y):
+	def __init__(self):
 		self.x = bombX
 		self.y = bombY
 
 def game_over_screen():
 	font = pygame.font.SysFont("Arial", 50, True)
 	text = font.render("GAME OVER", 50, (255, 0, 0))
-	win.blit(text, (400, 300))
-	win.blit(explosionImg, (x + 10, y + 10))
+	level1.blit(text, (400, 300))
+	level1.blit(explosionImg, (x + 10, y + 10))
 	pygame.display.update()
 
 def you_won_screen():
 	font = pygame.font.SysFont("Arial", 50, True)
 	text = font.render("YOU WON!", 50, (255, 255, 255))
-	win.blit(text, (400, 300))
+	level1.blit(text, (400, 300))
 	pygame.display.update()
 
 def reDrawWindow():
 	global helicopterX, helicopterY, helicopters, bulletX, bulletY, bullets, x, y, visible, aeroplaneX, aeroplaneY, aeroplanes, visibleA, visibleGP, greatplaneImg, greatPlaneX, greatPlaneY, gpBulletX, gpBulletY, directions, vel
 
-	win.blit(background, (bgX, 0))
-	win.blit(background, (bgX2, 0))
-	win.blit(planeImg, (x, y))
+	level1.blit(background, (bgX, 0))
+	level1.blit(background, (bgX2, 0))
+	level1.blit(planeImg, (x, y))
 
 	for i in range(4):
 		helicopter = Helicopter(helicopterX + i * 200, helicopterY, visible[i])
@@ -180,41 +177,15 @@ def reDrawWindow():
 
 	if len(bullets) > 0:
 		for i in range(len(bullets)):
-			win.blit(bulletImg, (bullets[i].x, bullets[i].y))
+			level1.blit(bulletImg, (bullets[i].x, bullets[i].y))
 
 	if len(bombs) > 0:
 		for i in range(len(bombs) - index):
-			win.blit(bombImg, (bombs[i].x, bombs[i].y))
+			level1.blit(bombImg, (bombs[i].x, bombs[i].y))
 
 	greatPlane = GreatPlane(greatPlaneX, greatPlaneY, visibleGP)
 	greatPlane.draw()
-
-	if greatPlaneX >= 750:
-		if greatPlane.visible:
-			pygame.draw.circle(win, (255, 0, 0), (gpBulletX, gpBulletY), 10)
-		
-		direction = directions[random.randrange(len(directions))]
-		if direction == directions[0]:
-			gpBulletY -= vel * 3
-		elif direction == directions[1]:
-			gpBulletY += vel * 3
-		elif direction == directions[2]:
-			gpBulletX -= vel * 3
-		elif direction == directions[3]:
-			gpBulletX += vel * 3
-		elif direction == directions[4]:
-			gpBulletY -= vel * 3
-			gpBulletX -= vel * 3
-		elif direction == directions[5]:
-			gpBulletY -= vel * 3
-			gpBulletX += vel * 3
-		elif direction == directions[6]:
-			gpBulletY += vel * 3
-			gpBulletX -= vel * 3
-		else:
-			gpBulletY += vel * 3
-			gpBulletX += vel * 3
-
+	
 	pygame.display.update()
 
 running = True
@@ -245,22 +216,22 @@ while running:
 
 	keys = pygame.key.get_pressed()
 
-	if keys[pygame.K_UP] and y > -30:
+	if keys[pygame.K_UP] and y - vel > 0:
 		y -= vel
 
-	if keys[pygame.K_DOWN] and y < 500:
+	if keys[pygame.K_DOWN] and y + vel < height - planeImg.get_height():
 		y += vel
 
-	if keys[pygame.K_LEFT] and x + vel > vel:
+	if keys[pygame.K_LEFT] and x - vel > 0:
 		x -= vel
 
-	if keys[pygame.K_RIGHT] and x < width - 125:
+	if keys[pygame.K_RIGHT] and x + vel < width - planeImg.get_width():
 		x += vel
 
 	if keys[pygame.K_SPACE] and shootLoop == 0:
 		bulletX = x + s1
 		bulletY = y + s2
-		bullet = Bullet(bulletX, bulletY)
+		bullet = Bullet()
 		bullets.append(bullet)
 
 		shootLoop = 1
@@ -270,12 +241,21 @@ while running:
 			bombX = x + s1
 			bombY = y + s2
 			if len(bombs) <= 5:
-				bomb = Bomb(bombX, bombY)
+				bomb = Bomb()
 				bombs.append(bomb)
 		else:
 			index += 1
 
 		shootLoopB = 1
+
+	try:
+		if greatPlane.y + greatplaneImg.get_height() < y + planeImg.get_height() - 20 and greatPlane.y + greatplaneImg.get_height() > y:
+			if greatPlane.x + greatplaneImg.get_width() < x + planeImg.get_height() and greatPlane.x + planeImg.get_width() > x:
+				game_over_screen()
+				running = False
+				time.sleep(0.1)
+	except:
+		pass
 
 	for helicopter in helicopters:
 		try:
@@ -344,7 +324,7 @@ while running:
 					except:
 						pass
 
-		win.blit(bulletImg, (bullet.x, bullet.y))
+		level1.blit(bulletImg, (bullet.x, bullet.y))
 		
 		for i in range(6):
 			if bullet.y + bulletImg.get_height() - 30 < aeroplaneY + aeroplaneImg.get_height() - 30 and bullet.y + bulletImg.get_height() > aeroplaneY:
@@ -377,7 +357,7 @@ while running:
 				except:
 					pass
 				try:
-					if hitNum1 >= 200:
+					if hitNum1 >= 800:
 						visibleGP = False
 					else:
 						hitNum1 += 1
@@ -417,7 +397,7 @@ while running:
 					except:
 						pass
 
-		win.blit(bombImg, (bomb.x, bomb.y))
+		level1.blit(bombImg, (bomb.x, bomb.y))
 		
 		for i in range(6):
 			if bomb.y + bombImg.get_height() - 30 < aeroplaneY + aeroplaneImg.get_height() - 30 and bomb.y + bombImg.get_height() > aeroplaneY:
@@ -445,7 +425,7 @@ while running:
 		if bomb.y + bombImg.get_height() - 30 < greatPlaneY + greatplaneImg.get_height() - 30 and bomb.y + bombImg.get_height() > greatPlaneY:
 			if bomb.x + bombImg.get_width() < greatPlaneX + greatplaneImg.get_width() and bomb.x + bombImg.get_width() > greatPlaneX:
 				try:
-					if hitNum2 >= 100:
+					if hitNum2 >= 400:
 						visibleGP = False
 					else:
 						hitNum2 += 1
@@ -486,7 +466,7 @@ while running:
 
 	if not visibleGP:
 		you_won_screen()
-		exit()
+		level1Completed = True
 		running = False
 		time.sleep(0.1)
 
@@ -496,9 +476,13 @@ while running:
 				if True not in visibleA:
 					if True not in visibleB:
 						you_won_screen()
+						level1Completed = True
 						running = False
 						time.sleep(0.1)
 
 	pygame.display.update()
 
 exit()
+
+if level1Completed:
+	pass
